@@ -1,10 +1,10 @@
-import fs from 'fs-extra'
-import path from 'path'
 import arg from 'arg'
 import chalk from 'chalk'
 import execa from 'execa'
-import * as logger from './logger'
+import fs from 'fs-extra'
+import path from 'path'
 import { getNextronConfig } from './configs/getNextronConfig'
+import * as logger from './logger'
 
 const args = arg({
   '--mac': Boolean,
@@ -38,10 +38,13 @@ const execaOptions: execa.Options = {
     await Promise.all([fs.remove(appDir), fs.remove(distDir)])
 
     logger.info('Building renderer process')
-    await execa('next', ['build', path.join(cwd, rendererSrcDir)], execaOptions)
+    // Cd into renderer folder and then run next build and export
     await execa(
-      'next',
-      ['export', '-o', appDir, path.join(cwd, rendererSrcDir)],
+      'sh',
+      [
+        '-c',
+        `cd ${rendererSrcDir} && yarn next build && yarn next export -o ${appDir}`,
+      ],
       execaOptions
     )
 

@@ -1,10 +1,10 @@
 import arg from 'arg'
+import type { ChildProcess } from 'child_process'
 import execa from 'execa'
 import webpack from 'webpack'
-import * as logger from './logger'
 import { getNextronConfig } from './configs/getNextronConfig'
 import { config } from './configs/webpack.config.development'
-import type { ChildProcess } from 'child_process'
+import * as logger from './logger'
 
 const args = arg({
   '--renderer-port': Number,
@@ -80,19 +80,21 @@ const execaOptions: execa.Options = {
   }
 
   const startRendererProcess = () => {
+    const rendererDirectory = nextronConfig.rendererSrcDir || 'renderer'
     logger.info(
-      `Run renderer process: next -p ${rendererPort} ${
-        nextronConfig.rendererSrcDir || 'renderer'
-      }`
+      `Run renderer process: cd ${rendererDirectory} && next -p ${rendererPort}`
     )
+
     const child = execa(
-      'next',
-      ['-p', rendererPort, nextronConfig.rendererSrcDir || 'renderer'],
+      'sh',
+      ['-c', `cd ${rendererDirectory} && yarn next -p ${rendererPort}`],
       execaOptions
     )
+
     child.on('close', () => {
       process.exit(0)
     })
+
     return child
   }
 
