@@ -48,9 +48,11 @@ const execaOptions = {
   try {
     info('Clearing previous builds');
     await Promise.all([fs$1.remove(appDir), fs$1.remove(distDir)]);
+    info('Delete app directory if exists and create again');
+    await fs$1.remove(appDir);
+    await fs$1.mkdir(appDir);
     info('Building renderer process');
-    // Cd into renderer folder and then run next build and export
-    await execa('sh', ['-c', `cd ${rendererSrcDir} && yarn next build && yarn next export -o ${appDir}`], execaOptions);
+    await execa('sh', ['-c', `cd ${rendererSrcDir} && yarn next build && mv out/* ${appDir} && rm -rf out`], execaOptions);
     info('Building main process');
     await execa('node', [path.join(__dirname, 'webpack.config.js')], execaOptions);
     if (args['--no-pack']) {

@@ -37,13 +37,16 @@ const execaOptions: execa.Options = {
     logger.info('Clearing previous builds')
     await Promise.all([fs.remove(appDir), fs.remove(distDir)])
 
+    logger.info('Delete app directory if exists and create again')
+    await fs.remove(appDir)
+    await fs.mkdir(appDir)
+
     logger.info('Building renderer process')
-    // Cd into renderer folder and then run next build and export
     await execa(
       'sh',
       [
         '-c',
-        `cd ${rendererSrcDir} && yarn next build && yarn next export -o ${appDir}`,
+        `cd ${rendererSrcDir} && yarn next build && mv out/* ${appDir} && rm -rf out`,
       ],
       execaOptions
     )
